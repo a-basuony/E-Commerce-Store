@@ -118,3 +118,43 @@ export const logout = async (req, res) => {
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
+
+// this will refresh the access token / recreate an access token
+export const refreshToken = async (req, res) => {
+  try {
+    const refreshToken = req.cookies.refreshToken;
+
+    if (!refreshToken) {
+      res.status(401).json({ message: "No refresh token provided" });
+    }
+
+    const decode = jwt.decode(refreshToken, process.env.REFRESH_TOKEN_SECRET); // decode the refresh token
+    const userId = decode.userId;
+
+    const storedToken = await redis.get(`refresh_token: ${userId}`); // get the refresh token from the redis
+
+    if (refreshToken !== storedToken) {
+      res.status(401).json({ message: "Invalid refresh token" });
+    }
+
+    const accessToken = jwt.sign(
+      { userId: decode.userId },
+      process.env.ACCESS_TOKEN_SECRET,
+      {
+        expiresIn: "15m",
+      }
+    );
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true, // prevent xss attack, cross site scripting attack
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict", // prevents CSRF attack , cross-site request forgery attack
+      maxAge: 15 * 60 * 1000, // 50min
+    });
+
+    res.json({ message: "Token refreshed successfully" });
+  } catch (error) {
+    console.log("Error in refreshToken controller", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
