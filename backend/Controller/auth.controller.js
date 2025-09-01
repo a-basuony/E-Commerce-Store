@@ -67,12 +67,37 @@ export const signup = async (req, res) => {
       message: "User created successfully",
     });
   } catch (error) {
+    console.log("Error in signup", error.message);
     res.status(500).json({ message: error.message });
   }
 };
 
 export const login = async (req, res) => {
-  res.send("login route called");
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+
+    if (user && (await user.comparePassword(password))) {
+      const { accessToken, refreshToken } = generateToken(user._id);
+
+      await storeRefreshToken(user._id, refreshToken);
+      setCookies(res, accessToken, refreshToken);
+
+      res.json({
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      });
+    } else {
+      res
+        .status(401)
+        .json({ message: "Invalid credentials email or password" });
+    }
+  } catch (error) {
+    console.log("Error in login", error.message);
+    res.status(500).json({ message: error.message });
+  }
 };
 
 export const logout = async (req, res) => {
@@ -89,6 +114,7 @@ export const logout = async (req, res) => {
     res.clearCookie("refreshToken");
     res.status(200).json({ message: "User logged out successfully" });
   } catch (error) {
+    console.log("Error in logout", error.message);
     res.status(500).json({ message: "Server error", error: error.message });
   }
 };
