@@ -6,6 +6,7 @@ import {
   deleteProduct,
   getRecommendedProducts,
   getProductByCategory,
+  toggleFeaturedProduct,
 } from "../Controller/product.controller.js";
 import { adminRoute, protectRoute } from "../middleware/auth.middleware.js";
 
@@ -16,6 +17,10 @@ router.get("/featured", getFeaturedProducts);
 router.get("/category/:category", getProductByCategory);
 router.get("/recommendation", getRecommendedProducts);
 router.post("/", protectRoute, adminRoute, createProduct);
+router.patch("/", protectRoute, adminRoute, toggleFeaturedProduct);
 router.delete("/:id", protectRoute, adminRoute, deleteProduct);
 
 export default router;
+
+// if you update  the entire document use put method
+// if you update only some fields use patch method for toggle the fields

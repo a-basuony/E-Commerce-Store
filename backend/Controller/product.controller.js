@@ -126,3 +126,32 @@ export const getProductByCategory = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const toggleFeaturedProduct = async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+
+    if (product) {
+      product.isFeatured = !product.isFeatured;
+      const updatedProduct = await product.save();
+      await updateFeaturedProductsCache();
+
+      res.status(200).json(updatedProduct);
+    } else {
+      res.status(404).json({ message: "Product not found" });
+    }
+  } catch (error) {
+    console.log("Error in toggleFeaturedProduct", error.message);
+    res.status(500).json({ message: error.message });
+  }
+};
+
+const updateFeaturedProductsCache = async () => {
+  try {
+    // .lean() to convert featuredProducts from Mongo document to js object => which is good for performance
+    const featuredProducts = await Product.find({ isFeatured: true }).lean();
+    await redis.set("featured_products", JSON.stringify(featuredProducts));
+  } catch (error) {
+    console.log("Error in updateFeaturedProductsCache", error.message);
+  }
+};
