@@ -8,7 +8,10 @@ export const protectRoute = async (req, res, next) => {
     if (!accessToken) {
       return res
         .status(401)
-        .json({ message: "unauthorized - no access token provided" });
+        .json({
+          message:
+            "unauthorized - no access token provided in cookies for admin route",
+        });
     }
 
     try {

@@ -25,9 +25,9 @@ const storeRefreshToken = async (userId, refreshToken) => {
 const setCookies = (res, accessToken, refreshToken) => {
   res.cookie("accessToken", accessToken, {
     httpOnly: true, // prevent xss attack, cross site scripting attack
-    secure: process.env.NODE_ENV === "production",
+    secure: process.env.NODE_ENV === "production", // in production it will be only https
     sameSite: "strict", // prevents CSRF attack , cross-site request forgery attack
-    maxAge: 15 * 60 * 1000, // 50min
+    maxAge: 15 * 60 * 1000, // 15 min
   });
 
   res.cookie("refreshToken", refreshToken, {
