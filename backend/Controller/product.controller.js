@@ -61,3 +61,33 @@ export const createProduct = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const deleteProduct = async (req, res) => {
+  try {
+    // 1- get the product id
+    const product = Product.findById(req.params.id);
+
+    if (!product) {
+      res.status(404).json({ message: "Product not found" });
+    }
+
+    // 2- delete the product image from cloudinary
+    if (product.image) {
+      // const productId = product._id.toString();
+      const publicId = product.image.split("/").pop().split(".")[0];
+      try {
+        await cloudinary.uploader.destroy(publicId);
+        console.log("Image deleted from cloudinary");
+      } catch (error) {
+        console.log("Error in deleting image from cloudinary", error.message);
+      }
+
+      // 3- delete the product from mongo db
+      await Product.findByIdAndDelete(req.params.id);
+      res.status(200).json({ message: "Product deleted successfully" });
+    }
+  } catch (error) {
+    console.log("Error in deleteProduct", error.message);
+    res.status(500).json({ message: error.message });
+  }
+};
