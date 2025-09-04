@@ -41,3 +41,34 @@ export const removeAllFromCart = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+export const updateQuantity = async (req, res) => {
+  try {
+    const { id: productId } = req.params;
+    const { quantity } = req.body;
+    const user = req.user;
+
+    const existingProduct = user.cartItems.find(
+      (item) => item.id.toString() === productId
+    );
+
+    if (existingProduct) {
+      if (quantity === 0) {
+        user.cartItems = user.cartItems.filter(
+          (item) => item.id.toString() !== productId
+        );
+        await user.save();
+        return res.status(200).json(user.cartItems);
+      } else {
+        existingProduct.quantity = quantity;
+        await user.save();
+        return res.status(200).json(user.cartItems);
+      }
+    } else {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+  } catch (error) {
+    console.log("Error in updateQuantity", error.message);
+    res.status(500).json({ message: error.message });
+  }
+};
