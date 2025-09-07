@@ -8,6 +8,7 @@ import authRoute from "./Routes/auth.route.js";
 import productRoutes from "./Routes/product.route.js";
 import cartRoutes from "./Routes/cart.route.js";
 import couponRoutes from "./Routes/coupon.route.js";
+import paymentRoutes from "./Routes/payment.route.js";
 
 import { connectDB } from "./lib/db.js";
 
@@ -23,6 +24,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/coupons", couponRoutes);
+app.use("/api/payment", paymentRoutes);
 
 app.listen(PORT, () => {
   console.log("server is running on http://localhost:" + PORT);
