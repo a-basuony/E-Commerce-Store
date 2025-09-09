@@ -1,11 +1,7 @@
-import express from "express";
-import { protectRoute } from "./../middleware/auth.middleware.js";
 import Coupon from "./../model/coupon.model.js";
 import stripe from "../lib/stripe.js";
 
-const router = express.Router();
-
-router.post("create-checkout-session", protectRoute, async (req, res) => {
+export const createCheckoutSession = async (req, res) => {
   try {
     const { products, couponCode } = req.body;
 
@@ -66,7 +62,7 @@ router.post("create-checkout-session", protectRoute, async (req, res) => {
 
     res.status(200).json({ id: session.id, totalAmount: totalAmount / 100 });
   } catch (error) {}
-});
+};
 
 async function createStripeCoupon(discountPercentage) {
   const coupon = await stripe.coupons.create({
@@ -87,5 +83,3 @@ async function createNewCoupon(userId) {
   await newCoupon.save();
   return newCoupon;
 }
-
-export default router;
